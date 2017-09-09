@@ -50,6 +50,9 @@ class MapVC: UIViewController, UIGestureRecognizerDelegate {
         collectionView?.dataSource = self
         collectionView?.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
         
+        //where is the 3d touch taking the rectangle from
+        registerForPreviewing(with: self, sourceView: collectionView!)
+        
         pullUpView.addSubview(collectionView!)
     }
     
@@ -222,6 +225,10 @@ extension MapVC: CLLocationManagerDelegate {
     
     func retrieveImages(handler: @escaping (_ static: Bool) -> ()) {
         for url in imageUrlArray {
+            Alamofire.request(url).responseJSON(completionHandler: { (response) in
+
+            })
+            
             Alamofire.request(url).responseImage(completionHandler: { (response) in
                 guard let image = response.result.value else { return }
                 self.imageArray.append(image)
@@ -268,5 +275,28 @@ extension MapVC: UICollectionViewDataSource, UICollectionViewDelegate {
         guard let popVC = storyboard?.instantiateViewController(withIdentifier: "PopVC") as? PopVC else { return }
         popVC.initData(forImage: imageArray[indexPath.row])   //sends the image we tap
         present(popVC, animated: true, completion: nil)
+    }
+}
+
+//for 3D touch of images
+extension MapVC: UIViewControllerPreviewingDelegate {
+    
+    //tells the app where in the screen are we pressing.  We first create a constant to hold the indexpath to know where we are presing from and then we create a cell so can access the photo from the cell
+    func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
+        guard let indexPath = collectionView?.indexPathForItem(at: location), let cell = collectionView?.cellForItem(at: indexPath) else { return nil }
+        
+        //this is what will show when push all the way through
+        guard let popVC = storyboard?.instantiateViewController(withIdentifier: "PopVC") as? PopVC else { return nil }
+        popVC.initData(forImage: imageArray[indexPath.row])
+        
+        //previewing
+        previewingContext.sourceRect = cell.contentView.frame
+        
+        return popVC
+    }
+    
+    //tells which vc it is suppose to commit
+    func previewingContext(_ previewingContext: UIViewControllerPreviewing, commit viewControllerToCommit: UIViewController) {
+        show(viewControllerToCommit, sender: self)
     }
 }

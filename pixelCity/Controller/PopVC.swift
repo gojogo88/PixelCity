@@ -12,6 +12,10 @@ class PopVC: UIViewController, UIGestureRecognizerDelegate {
 
     //Outlets
     @IBOutlet weak var popImageView: UIImageView!
+    @IBOutlet weak var imageTitle: UILabel!
+    @IBOutlet weak var imageDesc: UILabel!
+    @IBOutlet weak var imageLoc: MKMapView!
+    
     
     //variables
     var passedImage: UIImage!
